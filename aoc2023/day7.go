@@ -209,7 +209,7 @@ func ParseHand(line string) Hand {
 }
 
 func Day7Part1() {
-	loader, err := loader.NewLoader("2023-day7-part1.txt")
+	loader, err := loader.NewLoader("2023/day7.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -240,7 +240,7 @@ func Day7Part1() {
 
 }
 func Day7Part2() {
-	loader, err := loader.NewLoader("2023-day7-part1.txt")
+	loader, err := loader.NewLoader("2023/day7.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

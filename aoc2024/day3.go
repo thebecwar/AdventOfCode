@@ -8,7 +8,7 @@ import (
 )
 
 func Day3Part1() {
-	loader, err := loader.NewLoader("2024-day3-part1.txt")
+	loader, err := loader.NewLoader("2024/day3.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -43,7 +43,7 @@ func Day3Part1() {
 	fmt.Printf("Day 3, Part 1: %d (Count: %d)\n", sum, count)
 }
 func Day3Part2() {
-	loader, err := loader.NewLoader("2024-day3-part1.txt")
+	loader, err := loader.NewLoader("2024/day3.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

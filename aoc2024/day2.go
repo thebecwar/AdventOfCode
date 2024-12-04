@@ -34,7 +34,7 @@ func isSafe(numbers []int) bool {
 }
 
 func Day2Part1() {
-	loader, err := loader.NewLoader("2024-day2-part1.txt")
+	loader, err := loader.NewLoader("2024/day2.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -63,7 +63,7 @@ func Day2Part1() {
 	fmt.Printf("Day 2 Part 1: %d\n", safe)
 }
 func Day2Part2() {
-	loader, err := loader.NewLoader("2024-day2-part1.txt")
+	loader, err := loader.NewLoader("2024/day2.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

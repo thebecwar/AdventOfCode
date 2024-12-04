@@ -18,7 +18,7 @@ func parseLists(lines []string) (left []int, right []int) {
 }
 
 func Day1Part1() {
-	loader, err := loader.NewLoader("2024-day1-part1.txt")
+	loader, err := loader.NewLoader("2024/day1.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -46,7 +46,7 @@ func Day1Part1() {
 	fmt.Printf("Day 1 Part 1: %d\n", sum)
 }
 func Day1Part2() {
-	loader, err := loader.NewLoader("2024-day1-part1.txt")
+	loader, err := loader.NewLoader("2024/day1.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

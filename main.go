@@ -1,6 +1,7 @@
 package main
 
 import (
+	"advent/aoc2022"
 	"advent/aoc2023"
 	"advent/aoc2024"
 	"flag"
@@ -29,7 +30,9 @@ func main() {
 		*year, _ = strconv.Atoi(fileparse[0][1])
 		*day, _ = strconv.Atoi(fileparse[0][2])
 	}
-	if *year == 2023 {
+	if *year == 2022 {
+		dispatcher = &aoc2022.Aoc22Dispatcher{}
+	} else if *year == 2023 {
 		dispatcher = &aoc2023.Aoc23Dispatcher{}
 	} else if *year == 2024 {
 		dispatcher = &aoc2024.Aoc24Dispatcher{}

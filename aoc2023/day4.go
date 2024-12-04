@@ -79,7 +79,7 @@ func ParseCards(lines []string) []*Card {
 }
 
 func Day4Part1() {
-	loader, err := loader.NewLoader("2023-day4-part1.txt")
+	loader, err := loader.NewLoader("2023/day4.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -104,7 +104,7 @@ func Day4Part1() {
 	fmt.Printf("Day 4 Part 1: %d\n", sum)
 }
 func Day4Part2() {
-	loader, err := loader.NewLoader("2023-day4-part1.txt")
+	loader, err := loader.NewLoader("2023/day4.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

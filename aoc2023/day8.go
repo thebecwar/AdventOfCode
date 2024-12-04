@@ -59,7 +59,7 @@ func BuildTree(lines []string) *Tree {
 }
 
 func Day8Part1() {
-	loader, err := loader.NewLoader("2023-day8-part1.txt")
+	loader, err := loader.NewLoader("2023/day8.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -95,7 +95,7 @@ func Day8Part1() {
 
 }
 func Day8Part2() {
-	loader, err := loader.NewLoader("2023-day8-part1.txt")
+	loader, err := loader.NewLoader("2023/day8.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

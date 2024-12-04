@@ -106,7 +106,7 @@ func parseInput(lines []string) ([]int, SeedMappings) {
 }
 
 func Day5Part1() {
-	loader, err := loader.NewLoader("2023-day5-part1.txt")
+	loader, err := loader.NewLoader("2023/day5.txt")
 
 	if err != nil {
 		fmt.Println(err)
@@ -165,7 +165,7 @@ func Day5Part1() {
 }
 
 func Day5Part2() {
-	loader, err := loader.NewLoader("2023-day5-part1.txt")
+	loader, err := loader.NewLoader("2023/day5.txt")
 
 	if err != nil {
 		fmt.Println(err)

@@ -42,7 +42,7 @@ func computeFirstLastSum(lines []string) int {
 }
 
 func Day1Part1() {
-	loader, err := loader.NewLoader("2023-day1-part1.txt")
+	loader, err := loader.NewLoader("2023/day1.txt")
 
 	if err != nil {
 		fmt.Println(err)
@@ -53,7 +53,7 @@ func Day1Part1() {
 }
 
 func Day1Part2() {
-	loader, err := loader.NewLoader("2023-day1-part1.txt")
+	loader, err := loader.NewLoader("2023/day1.txt")
 
 	if err != nil {
 		fmt.Println(err)

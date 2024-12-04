@@ -224,7 +224,7 @@ func expandGrid(grid *containers.Grid[GridCell]) *containers.Grid[GridCell] {
 }
 
 func Day10Part1() {
-	loader, err := loader.NewLoader("2023-day10-part1.txt")
+	loader, err := loader.NewLoader("2023/day10.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -249,7 +249,7 @@ func Day10Part1() {
 }
 
 func Day10Part2() {
-	loader, err := loader.NewLoader("2023-day10-part1.txt")
+	loader, err := loader.NewLoader("2023/day10.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -53,7 +53,7 @@ func parseLine(line string) Game {
 }
 
 func Day2Part1() {
-	loader, err := loader.NewLoader("2023-day2-part1.txt")
+	loader, err := loader.NewLoader("2023/day2.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -86,7 +86,7 @@ func Day2Part1() {
 }
 
 func Day2Part2() {
-	loader, err := loader.NewLoader("2023-day2-part1.txt")
+	loader, err := loader.NewLoader("2023/day2.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

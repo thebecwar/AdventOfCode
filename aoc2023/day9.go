@@ -61,7 +61,7 @@ func backPredictRecursive(numbers []int) int {
 }
 
 func Day9Part1() {
-	loader, err := loader.NewLoader("2023-day9-part1.txt")
+	loader, err := loader.NewLoader("2023/day9.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -86,7 +86,7 @@ func Day9Part1() {
 	fmt.Printf("Day 9, Part 1: %d\n", sum)
 }
 func Day9Part2() {
-	loader, err := loader.NewLoader("2023-day9-part1.txt")
+	loader, err := loader.NewLoader("2023/day9.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -61,7 +61,7 @@ func isSymbol(c byte) bool {
 }
 
 func Day3Part1() {
-	loader, err := loader.NewLoader("2023-day3-part1.txt")
+	loader, err := loader.NewLoader("2023/day3.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -177,7 +177,7 @@ func (n *NumberPosition) RectContains(left int, right int, top int, bottom int) 
 }
 
 func Day3Part2() {
-	loader, err := loader.NewLoader("2023-day3-part1.txt")
+	loader, err := loader.NewLoader("2023/day3.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
