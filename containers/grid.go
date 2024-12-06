@@ -1,5 +1,7 @@
 package containers
 
+import "fmt"
+
 type Grid[T any] struct {
 	Cells [][]T
 }
@@ -45,4 +47,19 @@ func (g *Grid[T]) Find(predicate func(v T) bool) (int, int) {
 		}
 	}
 	return -1, -1
+}
+func (g *Grid[T]) PrintGrid() {
+	for _, row := range g.Cells {
+		for _, cell := range row {
+			fmt.Printf("%v", cell)
+		}
+		fmt.Println()
+	}
+}
+func (g *Grid[T]) Copy() *Grid[T] {
+	next := NewGrid[T](g.Width(), g.Height())
+	for y, row := range g.Cells {
+		copy(next.Cells[y], row)
+	}
+	return next
 }

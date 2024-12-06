@@ -22,6 +22,9 @@ func (d *Aoc24Dispatcher) Run(day int) {
 	case 5:
 		Day5Part1()
 		Day5Part2()
+	case 6:
+		Day6Part1()
+		Day6Part2()
 	default:
 		fmt.Println("Day not implemented")
 		return
