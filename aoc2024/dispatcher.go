@@ -1,11 +1,22 @@
 package aoc2024
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Aoc24Dispatcher struct {
 }
 
+func timer(name string) func() {
+	start := time.Now()
+	return func() {
+		fmt.Printf("%s took %v\n", name, time.Since(start))
+	}
+}
+
 func (d *Aoc24Dispatcher) Run(day int) {
+	defer timer(fmt.Sprintf("Day %d", day))()
 	switch day {
 	case 1:
 		Day1Part1()
