@@ -1,6 +1,12 @@
 package main
 
 import (
+	"advent/aoc2016"
+	"advent/aoc2017"
+	"advent/aoc2018"
+	"advent/aoc2019"
+	"advent/aoc2020"
+	"advent/aoc2021"
 	"advent/aoc2022"
 	"advent/aoc2023"
 	"advent/aoc2024"
@@ -213,7 +219,19 @@ func main() {
 		*year, _ = strconv.Atoi(fileparse[0][1])
 		*day, _ = strconv.Atoi(fileparse[0][2])
 	}
-	if *year == 2022 {
+	if *year == 2016 {
+		dispatcher = &aoc2016.Aoc16Dispatcher{}
+	} else if *year == 2017 {
+		dispatcher = &aoc2017.Aoc17Dispatcher{}
+	} else if *year == 2018 {
+		dispatcher = &aoc2018.Aoc18Dispatcher{}
+	} else if *year == 2019 {
+		dispatcher = &aoc2019.Aoc19Dispatcher{}
+	} else if *year == 2020 {
+		dispatcher = &aoc2020.Aoc20Dispatcher{}
+	} else if *year == 2021 {
+		dispatcher = &aoc2021.Aoc21Dispatcher{}
+	} else if *year == 2022 {
 		dispatcher = &aoc2022.Aoc22Dispatcher{}
 	} else if *year == 2023 {
 		dispatcher = &aoc2023.Aoc23Dispatcher{}
