@@ -1,12 +1,12 @@
 
-package aoc2024
+package aoc2016
 
 import (
 	"fmt"
 	"time"
 )
 
-type Aoc24Dispatcher struct {
+type Aoc16Dispatcher struct {
 }
 
 func timer(name string) func() {
@@ -16,7 +16,7 @@ func timer(name string) func() {
 	}
 }
 
-func (d *Aoc24Dispatcher) Run(day int) {
+func (d *Aoc16Dispatcher) Run(day int) {
 	defer timer(fmt.Sprintf("Day %d", day))()
 	switch day {
 	case 1:

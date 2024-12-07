@@ -1,0 +1,29 @@
+
+package aoc2017
+
+import (
+	"advent/loader"
+	"fmt"
+)
+
+func Day20Part1() {
+	loader, err := loader.NewLoader("2017/day20")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	loader.Lines = []string{}
+
+	fmt.Printf("Day 20 Part 1: %d\n", 0)
+}
+
+func Day20Part2() {
+	loader, err := loader.NewLoader("2017/day20")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	loader.Lines = []string{}
+
+	fmt.Printf("Day 20 Part 2: %d\n", 0)
+}
