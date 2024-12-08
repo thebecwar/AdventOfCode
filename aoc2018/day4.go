@@ -1,4 +1,3 @@
-
 package aoc2018
 
 import (
@@ -7,7 +6,7 @@ import (
 )
 
 func Day4Part1() {
-	loader, err := loader.NewLoader("2018/day4")
+	loader, err := loader.NewLoader("2018/day4.txt")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -18,7 +17,7 @@ func Day4Part1() {
 }
 
 func Day4Part2() {
-	loader, err := loader.NewLoader("2018/day4")
+	loader, err := loader.NewLoader("2018/day4.txt")
 	if err != nil {
 		fmt.Println(err)
 		return

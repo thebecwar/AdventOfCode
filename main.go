@@ -1,6 +1,7 @@
 package main
 
 import (
+	"advent/aoc2015"
 	"advent/aoc2016"
 	"advent/aoc2017"
 	"advent/aoc2018"
@@ -203,6 +204,7 @@ func main() {
 			}
 
 			// create input file
+			os.Mkdir(fmt.Sprintf("data/%d", *year), 0755)
 			fn = fmt.Sprintf("data/%d/day%d.txt", *year, i)
 			if _, err := os.Stat(fn); err != nil {
 				os.WriteFile(fn, []byte{}, 0644)
@@ -219,7 +221,9 @@ func main() {
 		*year, _ = strconv.Atoi(fileparse[0][1])
 		*day, _ = strconv.Atoi(fileparse[0][2])
 	}
-	if *year == 2016 {
+	if *year == 2015 {
+		dispatcher = &aoc2015.Aoc15Dispatcher{}
+	} else if *year == 2016 {
 		dispatcher = &aoc2016.Aoc16Dispatcher{}
 	} else if *year == 2017 {
 		dispatcher = &aoc2017.Aoc17Dispatcher{}
