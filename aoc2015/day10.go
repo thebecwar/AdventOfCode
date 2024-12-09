@@ -1,28 +1,40 @@
 package aoc2015
 
 import (
-	"advent/loader"
 	"fmt"
 )
 
-func Day10Part1() {
-	loader, err := loader.NewLoader("2015/day10.txt")
-	if err != nil {
-		fmt.Println(err)
-		return
+func lookAndSay(s string) string {
+	output := ""
+	count := 1
+	current := s[0]
+	for i := 1; i < len(s); i++ {
+		if s[i] != current {
+			output += fmt.Sprintf("%d%c", count, current)
+			count = 1
+			current = s[i]
+		} else {
+			count++
+		}
 	}
-	loader.Lines = []string{}
+	output += fmt.Sprintf("%d%c", count, current)
+	return output
+}
 
-	fmt.Printf("Day 10 Part 1: %d\n", 0)
+func Day10Part1() {
+	input := "1113222113"
+	for i := 0; i < 40; i++ {
+		input = lookAndSay(input)
+	}
+
+	fmt.Printf("Day 10 Part 1: %d\n", len(input))
 }
 
 func Day10Part2() {
-	loader, err := loader.NewLoader("2015/day10.txt")
-	if err != nil {
-		fmt.Println(err)
-		return
+	input := "1113222113"
+	for i := 0; i < 50; i++ {
+		input = lookAndSay(input)
 	}
-	loader.Lines = []string{}
 
-	fmt.Printf("Day 10 Part 2: %d\n", 0)
+	fmt.Printf("Day 10 Part 2: %d\n", len(input))
 }
