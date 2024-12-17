@@ -56,6 +56,16 @@ func (g *Grid[T]) PrintGrid() {
 		fmt.Println()
 	}
 }
+func (g *Grid[T]) ToString() string {
+	result := ""
+	for _, row := range g.Cells {
+		for _, cell := range row {
+			result += fmt.Sprintf("%v", cell)
+		}
+		result += "\n"
+	}
+	return result
+}
 func (g *Grid[T]) Copy() *Grid[T] {
 	next := NewGrid[T](g.Width(), g.Height())
 	for y, row := range g.Cells {
