@@ -4,7 +4,11 @@ import (
 	"advent/containers"
 	"advent/loader"
 	"container/heap"
+	"encoding/json"
 	"fmt"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 type Maze struct {
@@ -290,6 +294,60 @@ func (m Maze) FindAllMinCostPathPoints(min int) []containers.Point {
 	return result
 }
 
+type MazeNode struct {
+	Point     containers.Point
+	Direction string
+}
+type MazeEdge struct {
+	From MazeNode
+	To   MazeNode
+	Cost int
+}
+type MazeGraph struct {
+	Nodes []MazeNode
+	Edges []MazeEdge
+}
+
+func (m Maze) BuildGraph() *MazeGraph {
+	visited := map[MazePointWithDirection]bool{}
+	outNodes := map[containers.Point]bool{}
+	graph := &MazeGraph{}
+
+	queue := containers.NewQueue[MazePointWithDirection]()
+	queue.Enqueue(&MazePointWithDirection{Point: m.StartPoint, Direction: ">"})
+
+	for !queue.IsEmpty() {
+		current := *queue.Dequeue()
+		if visited[current] {
+			continue
+		}
+		visited[current] = true
+
+		if outNodes[current.Point] {
+			// Only add nodes once, but allow visiting multiple times as long as direction is different
+		} else {
+			graph.Nodes = append(graph.Nodes, MazeNode{Point: current.Point})
+			outNodes[current.Point] = true
+		}
+
+		neighbors := m.GetAvailableMoves(current.Point.X, current.Point.Y)
+		for _, neighbor := range neighbors {
+			toDirection := neighbor.Direction
+			if neighbor.Point == m.EndPoint {
+				toDirection = ""
+			}
+			graph.Edges = append(graph.Edges, MazeEdge{
+				From: MazeNode{Point: current.Point, Direction: current.Direction},
+				To:   MazeNode{Point: neighbor.Point, Direction: toDirection},
+				Cost: 1 + m.GetRotationCost(current.Direction, neighbor.Direction),
+			})
+			queue.Enqueue(&neighbor)
+		}
+	}
+
+	return graph
+}
+
 func Day16Part1() {
 	loader, err := loader.NewLoader("2024/day16.txt")
 	if err != nil {
@@ -350,8 +408,8 @@ func Day16Part2() {
 		fmt.Println(err)
 		return
 	}
-	// 7036
-	loader.Lines = []string{
+	// 45
+	/*loader.Lines = []string{
 		"###############",
 		"#.......#....E#",
 		"#.#.###.#.###.#",
@@ -367,8 +425,8 @@ func Day16Part2() {
 		"#.###.#.#.#.#.#",
 		"#S..#.....#...#",
 		"###############",
-	}
-	// 11048
+	}*/
+	// 64
 	/*loader.Lines = []string{
 		"#################",
 		"#...#...#...#..E#",
@@ -394,15 +452,69 @@ func Day16Part2() {
 	//maze.FillDeadEnds()
 	//maze.PrintGrid()
 
-	min := maze.FindMinCostPath()
-	minPoints := maze.FindAllMinCostPathPoints(min)
+	//min := maze.FindMinCostPath()
+	//minPoints := maze.FindAllMinCostPathPoints(min)
 
-	oh := "O"
-	for _, m := range minPoints {
-		maze.Set(m.X, m.Y, &oh)
+	graph := maze.BuildGraph()
+	data, err := json.Marshal(graph)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
-	maze.PrintGrid()
+	os.WriteFile("graph.json", data, 0644)
 
-	fmt.Printf("Day 16 Part 2: %d\n", len(minPoints))
+	// Process with python
+	pythonScript := fmt.Sprintf(`
+import networkx as nx
+import json
+data = None
+with open("graph.json") as f:
+	data = json.load(f)
+
+
+G = nx.DiGraph()
+
+#for node in data["Nodes"]:
+#	nodeid = f"{node['Point']['X']},{node['Point']['Y']},{node['Direction']}"
+#	G.add_node(nodeid)
+
+
+for edge in data["Edges"]:
+	fromid = f"{edge['From']['Point']['X']},{edge['From']['Point']['Y']},{edge['From']['Direction']}"
+	toid = f"{edge['To']['Point']['X']},{edge['To']['Point']['Y']},{edge['To']['Direction']}"
+	G.add_edge(fromid, toid, weight=edge['Cost'])
+
+all_paths = nx.all_shortest_paths(G, "%d,%d,>", "%d,%d,", weight="weight")
+points = set()
+for p in all_paths:
+	for point in p:
+		points.add(point)
+for point in points:
+	print(point)
+	`, maze.StartPoint.X, maze.StartPoint.Y, maze.EndPoint.X, maze.EndPoint.Y)
+	os.WriteFile("script.py", []byte(pythonScript), 0644)
+	out, err := exec.Command("python", "script.py").Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	os.Remove("graph.json")
+	os.Remove("script.py")
+
+	allMazePoints := map[containers.Point]bool{}
+	pointLines := strings.Split(string(out), "\n")
+	//oh := "O"
+	for _, l := range pointLines {
+		if l == "" {
+			continue
+		}
+		x, y := 0, 0
+		fmt.Sscanf(l, "%d,%d", &x, &y)
+		allMazePoints[containers.Point{X: x, Y: y}] = true
+		//maze.Set(x, y, &oh)
+	}
+	//maze.PrintGrid()
+
+	fmt.Printf("Day 16 Part 2: %d\n", len(allMazePoints))
 
 }
