@@ -19,7 +19,71 @@ func isPointVisitable(grid *containers.Grid[string], point containers.Point) boo
 	return *grid.Get(point.X, point.Y) == "." || *grid.Get(point.X, point.Y) == "S" || *grid.Get(point.X, point.Y) == "E"
 }
 
-func floodFillFindPoint(
+type WallCrossFill struct {
+	Location    containers.Point
+	CrossedWall bool
+}
+
+func findPoints(grid *containers.Grid[string], startPoint containers.Point, maxDistance int) map[containers.Point]int {
+	if startPoint.X < 0 || startPoint.X >= grid.Width() || startPoint.Y < 0 || startPoint.Y >= grid.Height() {
+		return map[containers.Point]int{}
+	}
+
+	result := map[containers.Point]int{}
+
+	visited := map[containers.Point]bool{}
+	queue := containers.NewStack[WallCrossFill]()
+	queue.Push(&WallCrossFill{Location: startPoint, CrossedWall: false})
+
+	// For each direction:
+	// If the point is more than Manhattan Distance from the start, skip it
+	// If we've crossed a wall to get to the current point:
+	//   If the next point is not a wall, this is a cheat point. We're done.
+	//   If the next point is a wall, continue
+	// If we haven't crossed a wall to get to the current point:
+	//   If the next point is a wall, enqueue the next point and continue.
+	//   If the next point is not a wall, skip it.
+	handleMovement := func(current WallCrossFill, next containers.Point) {
+		// OOB
+		if next.X < 0 || next.X >= grid.Width() || next.Y < 0 || next.Y >= grid.Height() {
+			return
+		}
+		if _, ok := visited[next]; !ok && next.ManhattanDistance(&startPoint) <= maxDistance {
+			// Have we already crossed a wall?
+			if current.CrossedWall {
+				if isPointVisitable(grid, next) {
+					result[next]++
+					visited[next] = true
+				} else {
+					// We're still in the wall
+					queue.Push(&WallCrossFill{Location: next, CrossedWall: true})
+				}
+			} else {
+				if isPointVisitable(grid, next) {
+					// We haven't crossed a wall, so this is not a cheat, it's just a path on the course
+					visited[next] = true
+				} else {
+					// We're in a wall, so let's cross it
+					queue.Push(&WallCrossFill{Location: next, CrossedWall: true})
+				}
+			}
+		}
+	}
+
+	for !queue.IsEmpty() {
+		current := *queue.Pop()
+		visited[current.Location] = true
+
+		handleMovement(current, containers.Point{X: current.Location.X, Y: current.Location.Y - 1})
+		handleMovement(current, containers.Point{X: current.Location.X, Y: current.Location.Y + 1})
+		handleMovement(current, containers.Point{X: current.Location.X - 1, Y: current.Location.Y})
+		handleMovement(current, containers.Point{X: current.Location.X + 1, Y: current.Location.Y})
+	}
+
+	return result
+}
+
+func FloodFillFindPoint(
 	grid *containers.Grid[string],
 	maxLength, remaining int,
 	currentPoint containers.Point,
@@ -40,20 +104,20 @@ func floodFillFindPoint(
 	}
 	if visitable && crossedWall {
 		(*reachable)[currentPoint]++
-		return
+		//return
 	}
 
 	if currentPoint.X-1 != fromPoint.X {
-		floodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X - 1, Y: currentPoint.Y}, reachable, currentPoint, true)
+		FloodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X - 1, Y: currentPoint.Y}, reachable, currentPoint, true)
 	}
 	if currentPoint.X+1 != fromPoint.X {
-		floodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X + 1, Y: currentPoint.Y}, reachable, currentPoint, true)
+		FloodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X + 1, Y: currentPoint.Y}, reachable, currentPoint, true)
 	}
 	if currentPoint.Y-1 != fromPoint.Y {
-		floodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X, Y: currentPoint.Y - 1}, reachable, currentPoint, true)
+		FloodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X, Y: currentPoint.Y - 1}, reachable, currentPoint, true)
 	}
 	if currentPoint.Y+1 != fromPoint.Y {
-		floodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X, Y: currentPoint.Y + 1}, reachable, currentPoint, true)
+		FloodFillFindPoint(grid, maxLength, remaining-1, containers.Point{X: currentPoint.X, Y: currentPoint.Y + 1}, reachable, currentPoint, true)
 	}
 }
 
@@ -64,11 +128,8 @@ func findCpuCheats(grid *containers.Grid[string], maxLength int, startPoint cont
 	for x := 0; x < grid.Width(); x++ {
 		for y := 0; y < grid.Height(); y++ {
 			if isPointVisitable(grid, containers.Point{X: x, Y: y}) {
-				reachable := map[containers.Point]int{}
-				fromPoint := containers.Point{X: -1, Y: -1}
-				//visited := map[containers.Point]bool{}
-				floodFillFindPoint(grid, maxLength, maxLength, containers.Point{X: x, Y: y}, &reachable, fromPoint, false)
-				for k, v := range reachable {
+				next := findPoints(grid, containers.Point{X: x, Y: y}, maxLength)
+				for k, v := range next {
 					cheats[CPUCheat{Start: containers.Point{X: x, Y: y}, End: k}] += v
 				}
 			}
@@ -95,7 +156,7 @@ func Day20Part1() {
 	part1Threshold := 100
 	part2Threshold := 100
 
-	loader.Lines = []string{
+	/*loader.Lines = []string{
 		"###############",
 		"#...#...#.....#",
 		"#.#.#.#.#.###.#",
@@ -113,7 +174,7 @@ func Day20Part1() {
 		"###############",
 	}
 	part1Threshold = 1
-	part2Threshold = 50
+	part2Threshold = 50*/
 
 	grid := containers.NewStringGrid(loader.Lines)
 
@@ -180,36 +241,21 @@ func Day20Part1() {
 	}
 	fmt.Printf("Day 20 Part 1: %d\n", routesInThreshold)
 
-	cpuCheats = findCpuCheats(grid, 20, start)
-	cheats = map[int]int{} // cheats[savings]count
-	for p, _ := range cpuCheats {
-		d := p.ManhattanDistance()
-		shortening := costs[p.End] - (costs[p.Start] + d)
-		if shortening < 0 {
-			cheats[-1] += 1
-		} else {
-			cheats[shortening] += 1
+	cheatCount := 0
+	for p, startCost := range costs {
+		for next, endCost := range costs {
+			if p == next {
+				continue
+			}
+			d := p.ManhattanDistance(&next)
+			if d <= 20 && endCost-startCost-d >= part2Threshold {
+				cheatCount++
+			}
 		}
 	}
-	routesInThreshold = 0
-	routesNotInThreshold := 0
-	for saving, n := range cheats {
-		if saving >= part2Threshold {
-			routesInThreshold += n
-		} else {
-			routesNotInThreshold += n
-		}
-	}
-	fmt.Printf("Day 20 Part 2: %d (excluded: %d)\n", routesInThreshold, routesNotInThreshold)
+	fmt.Printf("Day 20 Part 2: %d\n", cheatCount)
 }
 
 func Day20Part2() {
-	loader, err := loader.NewLoader("2024/day20.txt")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	loader.Lines = []string{}
-
-	fmt.Printf("Day 20 Part 2: %d\n", 0)
+	return
 }
