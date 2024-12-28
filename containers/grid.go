@@ -29,6 +29,9 @@ func (g *Grid[T]) Get(x, y int) *T {
 func (g *Grid[T]) Set(x, y int, value *T) {
 	g.Cells[y][x] = *value
 }
+func (g *Grid[T]) Swap(x1, y1, x2, y2 int) {
+	g.Cells[y1][x1], g.Cells[y2][x2] = g.Cells[y2][x2], g.Cells[y1][x1]
+}
 func (g *Grid[T]) Width() int {
 	return len(g.Cells[0])
 }

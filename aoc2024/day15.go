@@ -34,170 +34,53 @@ type Day15State struct {
 	Directions string
 }
 
-func (state Day15State) HasUgh() bool {
+func (state *Day15State) IsBoxTile(x, y int) bool {
+	value := *state.Grid.Get(x, y)
+	return value == boxTile || value == bigBoxLeft || value == bigBoxRight
+}
+func (state *Day15State) CountBoxes() int {
+	total := 0
 	for y := 0; y < state.Grid.Height(); y++ {
-		for x := 0; x < state.Grid.Width()-1; x++ {
-			if state.Grid.Cells[y][x] == bigBoxLeft && state.Grid.Cells[y][x+1] != bigBoxRight {
-				return true
+		for x := 0; x < state.Grid.Width(); x++ {
+			cell := *state.Grid.Get(x, y)
+			if cell == boxTile || cell == bigBoxLeft {
+				total++
 			}
 		}
 	}
-	return false
+	return total
 }
-
-func (state Day15State) MoveBigBoxes(direction string, lX, rX, leftY int) bool {
-	// Swaps don't work (as easily) in the big box case, since we "create" empty spaces by moving the box
-
-	// If our search region is half a box on either side, expand to cover all boxes.
-	leftX := lX
-	if *state.Grid.Get(leftX, leftY) == bigBoxRight {
-		leftX--
-	}
-	rightX := rX
-	if *state.Grid.Get(rightX, leftY) == bigBoxLeft {
-		rightX++
-	}
-
-	canMove := true
-	robotRow := false
-	for i := leftX; i <= rightX; i++ {
-		if *state.Grid.Get(i, leftY) == wallTile {
-			return false
-		}
-		// If the previous row has a box at this position, we can't move if this row has a box, but we could move if the next row is free
-		previous := *state.Grid.Get(i, leftY-directionMap[direction].Y)
-		current := *state.Grid.Get(i, leftY)
-		if previous == bigBoxLeft || previous == bigBoxRight {
-			if current != emptyTile {
-				canMove = false
+func (state *Day15State) CountWallTiles() int {
+	total := 0
+	for y := 0; y < state.Grid.Height(); y++ {
+		for x := 0; x < state.Grid.Width(); x++ {
+			if *state.Grid.Get(x, y) == wallTile {
+				total++
 			}
 		}
-		if previous == robotTile {
-			robotRow = true
-		}
 	}
-
-	if canMove && !robotRow {
-		// Need to support the case here:
-		// ###############
-		// #..[][][].....#
-		// #...[][]......#
-		// #....[].......# // current
-		// #..[]..[].....# // previous
-		// #.....^.......#
-		// ###############
-		// We have a compatible row to make this move.
-		for i := leftX; i <= rightX; i++ {
-			//current := *state.Grid.Get(i, leftY)
-			previous := *state.Grid.Get(i, leftY-directionMap[direction].Y)
-			if previous == bigBoxLeft || previous == bigBoxRight {
-				state.Grid.Set(i, leftY, &previous)
-				state.Grid.Set(i, leftY-directionMap[direction].Y, &emptyTile) // Where the box used to be
-			}
-		}
-		return true
-	}
-
-	next := state.MoveBigBoxes(direction, leftX, rightX, leftY+directionMap[direction].Y)
-	if next && !robotRow {
-		// We moved the next row, so we can move this row
-		for i := leftX; i <= rX; i++ {
-			previous := *state.Grid.Get(i, leftY-directionMap[direction].Y)
-			if previous == bigBoxLeft || previous == bigBoxRight {
-				state.Grid.Set(i, leftY, &previous)
-				state.Grid.Set(i, leftY-directionMap[direction].Y, &emptyTile) // Where the box used to be
-			}
-		}
-		return true
-	} else if next {
-		// implies robot row
-		return true
-	}
-
-	return false
-
+	return total
 }
-func (state *Day15State) MoveRecurse(direction string, x, y int, bigBoxMode bool) bool {
-	if bigBoxMode &&
-		(direction == "^" || direction == "v") &&
-		(*state.Grid.Get(x+directionMap[direction].X, y+directionMap[direction].Y) == bigBoxLeft ||
-			*state.Grid.Get(x+directionMap[direction].X, y+directionMap[direction].Y) == bigBoxRight) {
-		leftX, leftY := x, y
-		if *state.Grid.Get(x, y+directionMap[direction].Y) == bigBoxRight {
-			leftX--
+func (state *Day15State) Validate() bool {
+	for y := 0; y < state.Grid.Height(); y++ {
+		for x := 0; x < state.Grid.Width(); x++ {
+			cell := *state.Grid.Get(x, y)
+			if cell == boxTile || cell == bigBoxLeft {
+				if *state.Grid.Get(x+1, y) != bigBoxRight {
+					return false
+				}
+			}
 		}
-		moved := state.MoveBigBoxes(direction, leftX, leftX+1, leftY+directionMap[direction].Y)
-		if moved {
-			// We need to move the robot if we moved the box stack
-			state.Grid.Set(state.Position.X, state.Position.Y, &emptyTile)
-
-			// We only do the special movement logic if we're moving up or down
-			state.Position.Y += directionMap[direction].Y
-			state.Grid.Set(state.Position.X, state.Position.Y, &robotTile)
-		}
-		return false
 	}
-
-	// If we are at a wall return false
-	if *state.Grid.Get(x, y) == wallTile {
-		return false
-	}
-
-	// If we're at an empty space, swap and return true
-	if *state.Grid.Get(x, y) == emptyTile {
-		current := *state.Grid.Get(x, y)
-		previous := *state.Grid.Get(x-directionMap[direction].X, y-directionMap[direction].Y)
-		state.Grid.Set(x, y, &previous)
-		state.Grid.Set(x-directionMap[direction].X, y-directionMap[direction].Y, &current)
-		if previous == robotTile {
-			state.Position.X += directionMap[direction].X
-			state.Position.Y += directionMap[direction].Y
-		}
-		return previous != robotTile
-	}
-	if (*state.Grid.Get(x, y) == bigBoxLeft || *state.Grid.Get(x, y) == bigBoxRight) && direction != ">" && direction != "<" {
-		// Special case for moving big boxes up and down
-		// If we're at a big box, we need to recursively check both halves of the box, but we can only move if _both_ halves can move
-		leftX, leftY := x, y
-		if *state.Grid.Get(x, y) == bigBoxRight {
-			leftX--
-		}
-		moved := state.MoveBigBoxes(direction, leftX, leftX+1, leftY+directionMap[direction].Y)
-		if moved {
-			// We need to move the robot if we moved the box stack
-			state.Grid.Set(state.Position.X, state.Position.Y, &emptyTile)
-
-			// We only do the special movement logic if we're moving up or down
-			state.Position.Y += directionMap[direction].Y
-			state.Grid.Set(state.Position.X, state.Position.Y, &robotTile)
-		}
-		return false
-	}
-	next := state.MoveRecurse(direction, x+directionMap[direction].X, y+directionMap[direction].Y, false)
-	if next {
-		current := *state.Grid.Get(x, y)
-		previous := *state.Grid.Get(x-directionMap[direction].X, y-directionMap[direction].Y)
-		state.Grid.Set(x, y, &previous)
-		state.Grid.Set(x-directionMap[direction].X, y-directionMap[direction].Y, &current)
-		if previous == robotTile {
-			state.Position.X += directionMap[direction].X
-			state.Position.Y += directionMap[direction].Y
-		}
-		return previous != robotTile
-	}
-	return false
-}
-
-func (state *Day15State) Move(direction string, bigBoxMode bool) {
-	// from the robot's current position look in the target direction for an empty space. If we find it, shuffle as we go back.
-	state.MoveRecurse(direction, state.Position.X, state.Position.Y, bigBoxMode)
+	return true
 }
 
 func (state *Day15State) CalculateGPS() int {
 	total := 0
 	for y := 0; y < state.Grid.Height(); y++ {
 		for x := 0; x < state.Grid.Width(); x++ {
-			if *state.Grid.Get(x, y) == boxTile || *state.Grid.Get(x, y) == bigBoxLeft {
+			cell := *state.Grid.Get(x, y)
+			if cell == boxTile || cell == bigBoxLeft {
 				total += 100*y + x
 			}
 		}
@@ -229,6 +112,85 @@ func parseDay15State(lines []string) Day15State {
 	}
 
 	return state
+}
+
+func (state *Day15State) MoveHorizontal(direction string, start containers.Point) bool {
+	if *state.Grid.Get(start.X, start.Y) == wallTile {
+		return false
+	}
+	if *state.Grid.Get(start.X, start.Y) == emptyTile {
+		return true
+	}
+
+	if state.MoveHorizontal(direction, containers.Point{X: start.X + directionMap[direction].X, Y: start.Y}) {
+		state.Grid.Swap(start.X, start.Y, start.X+directionMap[direction].X, start.Y)
+		return true
+	}
+
+	return false
+}
+
+func (state *Day15State) MoveVertical(direction string, startX, endX, Y int) bool {
+	if *state.Grid.Get(startX, Y) == bigBoxRight {
+		startX--
+	}
+	if *state.Grid.Get(endX, Y) == bigBoxLeft {
+		endX++
+	}
+	for *state.Grid.Get(startX, Y) == emptyTile {
+		startX++
+	}
+	for *state.Grid.Get(endX, Y) == emptyTile {
+		endX--
+	}
+
+	// Look at next row to see if there's a wall in the way
+	canMove := true
+	checkNextRow := false
+	for x := startX; x <= endX; x++ {
+		nextIsBox := state.IsBoxTile(x, Y+directionMap[direction].Y)
+		currentIsBox := state.IsBoxTile(x, Y) || *state.Grid.Get(x, Y) == robotTile
+		nextIsFree := *state.Grid.Get(x, Y+directionMap[direction].Y) == emptyTile
+		nextIsWall := *state.Grid.Get(x, Y+directionMap[direction].Y) == wallTile
+		if currentIsBox && nextIsWall {
+			return false
+		}
+		if nextIsBox && currentIsBox {
+			checkNextRow = true
+			canMove = false
+		}
+		if nextIsFree && currentIsBox {
+			canMove = canMove && true
+		}
+	}
+
+	if checkNextRow {
+		canMove = state.MoveVertical(direction, startX, endX, Y+directionMap[direction].Y)
+	}
+
+	if canMove {
+		for x := startX; x <= endX; x++ {
+			previousY := Y + directionMap[direction].Y
+			if state.IsBoxTile(x, Y) || *state.Grid.Get(x, Y) == robotTile {
+				state.Grid.Swap(x, previousY, x, Y)
+			}
+		}
+		return true
+	}
+
+	return false
+}
+
+func (state *Day15State) Move(direction string) {
+	moved := false
+	if direction == "<" || direction == ">" {
+		moved = state.MoveHorizontal(direction, state.Position)
+	} else if direction == "^" || direction == "v" {
+		moved = state.MoveVertical(direction, state.Position.X, state.Position.X, state.Position.Y)
+	}
+	if moved {
+		state.Position = containers.Point{X: state.Position.X + directionMap[direction].X, Y: state.Position.Y + directionMap[direction].Y}
+	}
 }
 
 func Day15Part1() {
@@ -280,7 +242,9 @@ func Day15Part1() {
 	sx, sy := state.Grid.Find(func(value string) bool { return value == robotTile })
 	state.Position = containers.Point{X: sx, Y: sy}
 	for i := 0; i < len(state.Directions); i++ {
-		state.Move(string(state.Directions[i]), false)
+		//state.Grid.PrintGrid()
+		//fmt.Println(string(state.Directions[i]))
+		state.Move(string(state.Directions[i]))
 	}
 	//state.Grid.PrintGrid()
 
@@ -293,7 +257,7 @@ func Day15Part2() {
 		fmt.Println(err)
 		return
 	}
-	loader.Lines = []string{
+	/*loader.Lines = []string{
 		"##########",
 		"#..O..O.O#",
 		"#......O.#",
@@ -315,37 +279,65 @@ func Day15Part2() {
 		"<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>",
 		"^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>",
 		"v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^",
-	}
-	/*loader.Lines = []string{
-		"########",
-		"#..O.O.#",
-		"##@.O..#",
-		"#...O..#",
-		"#.#.O..#",
-		"#...O..#",
-		"#......#",
-		"########",
-		"",
-		"<^^>>>vv<v>>v<<",
 	}*/
+	/*loader.Lines = []string{
+		"#######",
+		"#...#.#",
+		"#.....#",
+		"#..OO@#",
+		"#..O..#",
+		"#.....#",
+		"#######",
+		"",
+		"<vv<<^^<<^^",
+	}*/
+	loader.Lines = []string{
+		"##################",
+		"####....##....####",
+		"##..[][]..[][]..##",
+		"##...[]....[]...##",
+		"##....[]..[][]..##",
+		"##..[][]..[][]..##",
+		"##....[]...[]...##",
+		"##....[]..[]....##",
+		"##.....[][].....##",
+		"##......[]......##",
+		"##.......@......##",
+		"##################",
+		"",
+		"^",
+	}
 	state := parseDay15State(loader.Lines)
 	if state.Grid == nil {
 		return
 	}
 	//state.Grid.PrintGrid()
-	state.ExpandMap()
+	//state.ExpandMap()
 	//state.Grid.PrintGrid()
+
+	startCount := state.CountBoxes()
+	startWalls := state.CountWallTiles()
 
 	sx, sy := state.Grid.Find(func(value string) bool { return value == robotTile })
 	state.Position = containers.Point{X: sx, Y: sy}
 	for i := 0; i < len(state.Directions); i++ {
-		fmt.Println(string(state.Directions[i]))
-		state.Move(string(state.Directions[i]), true)
-		if state.HasUgh() {
-			fmt.Println("UGH")
+		//state.Grid.PrintGrid()
+		//fmt.Println(string(state.Directions[i]))
+		state.Move(string(state.Directions[i]))
+		count := state.CountBoxes()
+		if count != startCount {
+			panic(fmt.Sprintf("Box count changed from %d to %d at %d", startCount, count, i))
 		}
-		state.Grid.PrintGrid()
+		count = state.CountWallTiles()
+		if count != startWalls {
+			panic(fmt.Sprintf("Wall count changed from %d to %d at %d", startWalls, count, i))
+		}
+		if !state.Validate() {
+			panic(fmt.Sprintf("Invalid state at %d", i))
+		}
 	}
+	state.Grid.PrintGrid()
+	endCount := state.CountBoxes()
 
-	fmt.Printf("Day 15 Part 1: %d\n", state.CalculateGPS())
+	fmt.Printf("Day 15 Part 2: %d, (start: %d, end %d)\n", state.CalculateGPS(), startCount, endCount)
 }
