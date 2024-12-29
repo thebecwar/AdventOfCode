@@ -4,6 +4,12 @@ type List[T any] struct {
 	Items []T
 }
 
+func NewList[T any]() *List[T] {
+	return &List[T]{
+		Items: make([]T, 0),
+	}
+}
+
 func (l *List[T]) Add(item T) {
 	l.Items = append(l.Items, item)
 }
