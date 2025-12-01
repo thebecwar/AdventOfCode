@@ -11,6 +11,7 @@ import (
 	"advent/aoc2022"
 	"advent/aoc2023"
 	"advent/aoc2024"
+	"advent/aoc2025"
 	"bytes"
 	"flag"
 	"fmt"
@@ -241,6 +242,8 @@ func main() {
 		dispatcher = &aoc2023.Aoc23Dispatcher{}
 	} else if *year == 2024 {
 		dispatcher = &aoc2024.Aoc24Dispatcher{}
+	} else if *year == 2025 {
+		dispatcher = &aoc2025.Aoc25Dispatcher{}
 	}
 
 	dispatcher.Run(*day)
